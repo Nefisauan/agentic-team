@@ -17,9 +17,9 @@ const logger = require('../config/logger');
 async function runClientFindingAgent({
   industries = ['HVAC', 'roofing', 'plumbing', 'electrical', 'landscaping', 'cleaning', 'auto detailing'],
   location = 'Utah',
-  count = 15,
-  autoConvert = false,
-  autoDM = false,
+  count = 20,
+  autoConvert = true,
+  autoDM = true,
 }) {
   logger.info('Client-finding agent started', { industries, location, count });
 

@@ -142,11 +142,11 @@ router.delete('/:id', async (req, res, next) => {
 router.post('/research', async (req, res, next) => {
   try {
     const {
-      industries = ['HVAC', 'roofing', 'plumbing', 'electrical', 'landscaping', 'cleaning'],
+      industries = ['HVAC', 'roofing', 'plumbing', 'electrical', 'landscaping', 'cleaning', 'auto detailing'],
       location = 'Utah',
-      count = 15,
-      autoConvert = false,
-      autoDM = false,
+      count = 20,
+      autoConvert = true,
+      autoDM = true,
     } = req.body;
 
     const job = await addClientFindingJob({ industries, location, count, autoConvert, autoDM });

@@ -1,8 +1,41 @@
-const { Worker } = require('bullmq');
+const { Worker, Queue } = require('bullmq');
 const { getRedisConnection } = require('../config/redis');
 const { runClientFindingAgent } = require('../agents/clientFindingAgent');
 const supervisor = require('../middleware/supervisor');
+const { CLIENT_FINDING_CRON_SCHEDULE, DAILY_PROSPECT_COUNT } = require('../config/env');
 const logger = require('../config/logger');
+
+const clientFindingQueue = new Queue('client-finding', {
+  connection: getRedisConnection(),
+  defaultJobOptions: {
+    attempts: 2,
+    backoff: { type: 'fixed', delay: 60000 },
+    removeOnComplete: { count: 100 },
+    removeOnFail: { count: 50 },
+  },
+});
+
+// Schedule daily prospect research
+async function scheduleClientFindingJob() {
+  const repeatableJobs = await clientFindingQueue.getRepeatableJobs();
+  for (const job of repeatableJobs) {
+    await clientFindingQueue.removeRepeatableByKey(job.key);
+  }
+
+  await clientFindingQueue.add(
+    'daily-prospect-research',
+    {
+      count: DAILY_PROSPECT_COUNT,
+      autoConvert: true,
+      autoDM: true,
+    },
+    {
+      repeat: { pattern: CLIENT_FINDING_CRON_SCHEDULE },
+    }
+  );
+
+  logger.info('Client-finding job scheduled', { cron: CLIENT_FINDING_CRON_SCHEDULE, count: DAILY_PROSPECT_COUNT });
+}
 
 const worker = new Worker(
   'client-finding',
@@ -17,7 +50,7 @@ const worker = new Worker(
   },
   {
     connection: getRedisConnection(),
-    concurrency: 1, // Research is heavy on API calls
+    concurrency: 1,
   }
 );
 
@@ -36,4 +69,4 @@ worker.on('stalled', (jobId) => {
 
 logger.info('Client-finding worker started');
 
-module.exports = worker;
+module.exports = { clientFindingWorker: worker, scheduleClientFindingJob, clientFindingQueue };

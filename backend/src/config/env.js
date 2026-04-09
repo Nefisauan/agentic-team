@@ -57,5 +57,8 @@ module.exports = {
   // Content schedule
   CONTENT_POSTS_PER_WEEK: parseInt(process.env.CONTENT_POSTS_PER_WEEK || '4', 10),
   CONTENT_CRON_SCHEDULE: process.env.CONTENT_CRON_SCHEDULE || '0 9 * * 1', // Mondays 9am
-  CLIENT_FINDING_CRON_SCHEDULE: process.env.CLIENT_FINDING_CRON_SCHEDULE || '0 10 * * 1', // Mondays 10am
+  CLIENT_FINDING_CRON_SCHEDULE: process.env.CLIENT_FINDING_CRON_SCHEDULE || '0 8 * * *', // Daily 8am
+  DM_BATCH_CRON_SCHEDULE: process.env.DM_BATCH_CRON_SCHEDULE || '0 10 * * *', // Daily 10am
+  DAILY_PROSPECT_COUNT: parseInt(process.env.DAILY_PROSPECT_COUNT || '20', 10),
+  DM_BATCH_LIMIT: parseInt(process.env.DM_BATCH_LIMIT || '20', 10),
 };

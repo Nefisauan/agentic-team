@@ -1,27 +1,42 @@
 /**
  * Worker process — run separately from the API server.
  * Start with: npm run workers
+ *
+ * Runs 8 agents:
+ * - outreach, followup, qualification, scheduling (email pipeline)
+ * - content (weekly IG/LI post generation)
+ * - dm + dm-schedule (daily DM batches to 20 prospects)
+ * - client-finding (daily prospect research — 20/day)
+ * - analytics (daily snapshot)
  */
 require('../config/env').validateEnv();
 
 const logger = require('../config/logger');
 
-// Boot all workers
+// Boot email pipeline workers
 require('./outreachWorker');
 require('./followupWorker');
 require('./qualificationWorker');
 require('./schedulingWorker');
 require('./contentWorker');
-require('./dmWorker');
-require('./clientFindingWorker');
 
+// Boot social + client-finding workers (with daily cron schedules)
+const { dmWorker, scheduleDMBatchJobs } = require('./dmWorker');
+const { clientFindingWorker, scheduleClientFindingJob } = require('./clientFindingWorker');
 const { analyticsWorker, scheduleAnalyticsJob } = require('./analyticsWorker');
 
-scheduleAnalyticsJob().catch((err) => {
-  logger.error('Failed to schedule analytics job', { error: err.message });
+// Schedule all cron jobs
+Promise.all([
+  scheduleAnalyticsJob(),
+  scheduleClientFindingJob(),
+  scheduleDMBatchJobs(),
+]).then(() => {
+  logger.info('All cron jobs scheduled (analytics daily, client-finding daily, DM batches daily)');
+}).catch((err) => {
+  logger.error('Failed to schedule cron jobs', { error: err.message });
 });
 
-logger.info('All 8 workers started and listening (email + social + client-finding)');
+logger.info('All workers started: email pipeline + social content + DM outreach + client-finding');
 
 // Graceful shutdown
 async function shutdown(signal) {

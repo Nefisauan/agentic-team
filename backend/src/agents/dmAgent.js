@@ -192,7 +192,7 @@ async function processBatchDMs({ platform, context }) {
        AND sd.platform = $1
      )
      ORDER BY p.score DESC
-     LIMIT 10`,
+     LIMIT 20`,
     [platform]
   );
 
