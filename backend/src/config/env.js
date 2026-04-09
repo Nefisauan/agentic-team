@@ -47,4 +47,15 @@ module.exports = {
   ANALYTICS_CRON_SCHEDULE: process.env.ANALYTICS_CRON_SCHEDULE || '0 8 * * *',
 
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
+
+  // Social media (optional — DM sending mocked in dev)
+  INSTAGRAM_ACCESS_TOKEN: process.env.INSTAGRAM_ACCESS_TOKEN || '',
+  INSTAGRAM_BUSINESS_ID: process.env.INSTAGRAM_BUSINESS_ID || '',
+  LINKEDIN_ACCESS_TOKEN: process.env.LINKEDIN_ACCESS_TOKEN || '',
+  LINKEDIN_ORG_ID: process.env.LINKEDIN_ORG_ID || '',
+
+  // Content schedule
+  CONTENT_POSTS_PER_WEEK: parseInt(process.env.CONTENT_POSTS_PER_WEEK || '4', 10),
+  CONTENT_CRON_SCHEDULE: process.env.CONTENT_CRON_SCHEDULE || '0 9 * * 1', // Mondays 9am
+  CLIENT_FINDING_CRON_SCHEDULE: process.env.CLIENT_FINDING_CRON_SCHEDULE || '0 10 * * 1', // Mondays 10am
 };

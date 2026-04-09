@@ -2,14 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Activity, BarChart3, Zap } from 'lucide-react';
+import { Users, Activity, BarChart3, Zap, Instagram, MessageCircle, Search, FileText } from 'lucide-react';
 import clsx from 'clsx';
 
 const nav = [
   { href: '/', label: 'Dashboard', icon: BarChart3 },
   { href: '/leads', label: 'Leads', icon: Users },
+  { href: '/social', label: 'Social Content', icon: Instagram },
+  { href: '/prospects', label: 'Prospects', icon: Search },
   { href: '/activity', label: 'Activity', icon: Activity },
   { href: '/metrics', label: 'Metrics', icon: BarChart3 },
+  { href: '/reports', label: 'Reports', icon: FileText },
 ];
 
 export default function Sidebar() {
@@ -22,7 +25,7 @@ export default function Sidebar() {
           <Zap className="w-5 h-5 text-blue-400" />
           <span className="font-semibold text-sm tracking-wide">AutoReach</span>
         </div>
-        <p className="text-xs text-slate-400 mt-1">Multi-agent outreach</p>
+        <p className="text-xs text-slate-400 mt-1">Multi-agent outreach + social</p>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -44,7 +47,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-5 py-4 border-t border-slate-700">
-        <p className="text-xs text-slate-500">v1.0.0 — MVP</p>
+        <p className="text-xs text-slate-500">v2.0.0 — Social + Email</p>
       </div>
     </aside>
   );

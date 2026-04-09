@@ -11,6 +11,9 @@ require('./outreachWorker');
 require('./followupWorker');
 require('./qualificationWorker');
 require('./schedulingWorker');
+require('./contentWorker');
+require('./dmWorker');
+require('./clientFindingWorker');
 
 const { analyticsWorker, scheduleAnalyticsJob } = require('./analyticsWorker');
 
@@ -18,7 +21,7 @@ scheduleAnalyticsJob().catch((err) => {
   logger.error('Failed to schedule analytics job', { error: err.message });
 });
 
-logger.info('All workers started and listening');
+logger.info('All 8 workers started and listening (email + social + client-finding)');
 
 // Graceful shutdown
 async function shutdown(signal) {

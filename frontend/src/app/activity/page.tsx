@@ -18,6 +18,9 @@ const queueColors: Record<string, string> = {
   qualification: 'bg-green-100 text-green-700',
   scheduling: 'bg-orange-100 text-orange-700',
   analytics: 'bg-slate-100 text-slate-600',
+  content: 'bg-pink-100 text-pink-700',
+  dm: 'bg-purple-100 text-purple-700',
+  'client-finding': 'bg-cyan-100 text-cyan-700',
 };
 
 export default function ActivityPage() {

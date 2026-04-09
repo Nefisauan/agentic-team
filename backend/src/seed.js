@@ -99,11 +99,106 @@ const stagedLeads = [
   },
 ];
 
-async function seed() {
-  logger.info('Starting Revenue Pro Systems seed...');
+// ── Sample social media posts ───────────────────────────────────────────────
+const samplePosts = [
+  {
+    platform: 'instagram',
+    content_type: 'post',
+    caption: "62% of calls to service businesses go unanswered. That's not a marketing problem — it's a revenue leak.\n\nOur AI system picks up in 60 seconds. Every time. Even at 2am on a Saturday.\n\nStop losing $5K+ jobs to your competitor's voicemail.",
+    hashtags: ['LeadAutomation', 'ServiceBusiness', 'HVAC', 'RoofingBusiness', 'UtahBusiness', 'AI', 'SmallBusiness'],
+    image_prompt: 'Professional photo of an HVAC technician checking their phone with a satisfied expression, work van in background',
+    status: 'published',
+    engagement: { likes: 47, comments: 8, shares: 3, reach: 1250 },
+  },
+  {
+    platform: 'instagram',
+    content_type: 'carousel',
+    caption: "3 leads walked into a plumber's inbox last Tuesday.\n\nLead 1: Got a text back in 45 seconds. Booked.\nLead 2: Got a follow-up email in 2 minutes. Booked.\nLead 3: Got an AI chat response instantly. Booked.\n\nAll 3 happened while the owner was under a sink.\n\nThat's automation working for you.",
+    hashtags: ['Plumbing', 'LeadGen', 'BusinessAutomation', 'RevenueProSystems', 'UtahContractor'],
+    image_prompt: 'Split carousel: 1) Phone showing text message 2) Email inbox 3) Chat widget 4) Happy plumber giving thumbs up',
+    status: 'scheduled',
+    engagement: {},
+  },
+  {
+    platform: 'linkedin',
+    content_type: 'post',
+    caption: "I spent the last 6 months studying why local service businesses lose 30-50% of their potential revenue.\n\nThe answer isn't marketing. It's response time.\n\n78% of customers hire whoever responds first. Not the cheapest. Not the most experienced. The FASTEST.\n\nAt Revenue Pro Systems, we built a done-for-you system that responds to every lead in under 60 seconds — texts, emails, and chat. No apps to learn. No dashboards to check.\n\nOne HVAC contractor in Utah County went from missing half his leads to booking 3-4 extra jobs per week.\n\nIf you're running a service business and still manually following up with leads, you're leaving money on the table.\n\n#LeadAutomation #ServiceBusiness #B2B #SalesAutomation",
+    hashtags: ['LeadAutomation', 'ServiceBusiness', 'B2B', 'SalesAutomation', 'GrowthPartner'],
+    image_prompt: 'Professional headshot or branded graphic with stat: 78% go with whoever responds first',
+    status: 'published',
+    engagement: { likes: 23, comments: 5, shares: 2, impressions: 3400 },
+  },
+  {
+    platform: 'linkedin',
+    content_type: 'article',
+    caption: "Why the best roofing companies in Utah are ditching call centers for AI.\n\nA $15/hour receptionist can handle 1 call at a time. Our system handles unlimited. 24/7.\n\nThe ROI isn't even close.\n\nFull breakdown in comments.",
+    hashtags: ['Roofing', 'AI', 'BusinessGrowth', 'Utah', 'Automation'],
+    image_prompt: 'Branded infographic comparing receptionist cost vs. automation cost with ROI numbers',
+    status: 'draft',
+    engagement: {},
+  },
+];
 
-  // Clear existing data
-  await query('TRUNCATE TABLE job_logs, analytics_snapshots, events, messages, leads CASCADE');
+// ── Sample prospects (from client-finding agent) ────────────────────────────
+const sampleProspects = [
+  {
+    company_name: 'Summit HVAC Solutions',
+    contact_name: 'Derek Larsen',
+    contact_role: 'Owner',
+    email: 'derek@summithvac.com',
+    phone: '+1-801-555-0201',
+    website: 'https://summithvac.com',
+    instagram_handle: '@summithvacutah',
+    linkedin_url: 'https://linkedin.com/in/dereklarsen-hvac',
+    industry: 'HVAC',
+    location: 'Orem, UT',
+    employee_count: '5-15',
+    notes: 'Growing HVAC company, 4.8 stars on Google with 200+ reviews. Website has no live chat or instant response. High volume of missed call complaints in reviews.',
+    source: 'google_maps',
+    score: 88,
+    status: 'approved',
+  },
+  {
+    company_name: 'Wasatch Roofing Co',
+    contact_name: 'Trevor Kim',
+    contact_role: 'Operations Manager',
+    email: 'trevor@wasatchroofing.net',
+    phone: '+1-385-555-0202',
+    website: 'https://wasatchroofing.net',
+    instagram_handle: '@wasatchroofingco',
+    linkedin_url: 'https://linkedin.com/in/trevorkim-roofing',
+    industry: 'roofing',
+    location: 'Sandy, UT',
+    employee_count: '15-30',
+    notes: 'Large roofing operation, runs Facebook ads but no automated follow-up. Competitors are outpacing on response time.',
+    source: 'linkedin_search',
+    score: 75,
+    status: 'new',
+  },
+  {
+    company_name: "Jensen's Lawn Care",
+    contact_name: 'Matt Jensen',
+    contact_role: 'Owner',
+    email: 'matt@jensenslawncare.com',
+    phone: '+1-801-555-0203',
+    website: 'https://jensenslawncare.com',
+    instagram_handle: '@jensenslawncare',
+    linkedin_url: '',
+    industry: 'landscaping',
+    location: 'Provo, UT',
+    employee_count: '1-5',
+    notes: 'Solo operator expanding to 3-person crew. Mentioned on Facebook group that he loses jobs because he can\'t answer calls while mowing.',
+    source: 'facebook_group',
+    score: 92,
+    status: 'new',
+  },
+];
+
+async function seed() {
+  logger.info('Starting Revenue Pro Systems seed (with social media)...');
+
+  // Clear existing data (including new tables)
+  await query('TRUNCATE TABLE weekly_reports, social_dms, social_posts, prospects, job_logs, analytics_snapshots, events, messages, leads CASCADE');
   logger.info('Tables cleared');
 
   // ── New leads → queue outreach ──────────────────────────────────────────────
@@ -154,6 +249,60 @@ async function seed() {
     logger.info('Pipeline lead seeded', { name: lead.name, status: lead.status });
   }
 
+  // ── Social media posts ────────────────────────────────────────────────────
+  for (const post of samplePosts) {
+    const scheduledFor = post.status === 'scheduled'
+      ? new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) // 2 days from now
+      : null;
+    const publishedAt = post.status === 'published'
+      ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) // random in last week
+      : null;
+
+    await query(
+      `INSERT INTO social_posts (platform, content_type, caption, hashtags, image_prompt, status, engagement, scheduled_for, published_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        post.platform,
+        post.content_type,
+        post.caption,
+        post.hashtags,
+        post.image_prompt,
+        post.status,
+        JSON.stringify(post.engagement),
+        scheduledFor,
+        publishedAt,
+      ]
+    );
+    logger.info('Social post seeded', { platform: post.platform, status: post.status });
+  }
+
+  // ── Prospects ──────────────────────────────────────────────────────────────
+  for (const prospect of sampleProspects) {
+    await query(
+      `INSERT INTO prospects (company_name, contact_name, contact_role, email, phone, website,
+        instagram_handle, linkedin_url, industry, location, employee_count, notes, source, score, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+      [
+        prospect.company_name, prospect.contact_name, prospect.contact_role,
+        prospect.email, prospect.phone, prospect.website,
+        prospect.instagram_handle, prospect.linkedin_url,
+        prospect.industry, prospect.location, prospect.employee_count,
+        prospect.notes, prospect.source, prospect.score, prospect.status,
+      ]
+    );
+    logger.info('Prospect seeded', { name: prospect.contact_name, company: prospect.company_name });
+  }
+
+  // ── Sample DMs ──────────────────────────────────────────────────────────────
+  await query(
+    `INSERT INTO social_dms (platform, direction, message, status, metadata, sent_at)
+     VALUES ('instagram', 'outbound', $1, 'delivered', $2, NOW() - INTERVAL '2 days')`,
+    [
+      "Hey Derek! Saw Summit HVAC is crushing it with those Google reviews. Quick question — are you capturing all the leads coming in from those searches? We help HVAC companies make sure no call goes unanswered. Curious if that's something you've thought about.",
+      JSON.stringify({ recipient: '@summithvacutah' }),
+    ]
+  );
+
   // ── Snapshot analytics ──────────────────────────────────────────────────────
   const { runAnalyticsAgent } = require('./agents/analyticsAgent');
   await runAnalyticsAgent();
@@ -161,10 +310,13 @@ async function seed() {
   logger.info('\n✓ Seed complete!');
   logger.info(`  New leads (will trigger outreach): ${newLeads.length}`);
   logger.info(`  Pipeline leads (for dashboard demo): ${stagedLeads.length}`);
+  logger.info(`  Social posts: ${samplePosts.length}`);
+  logger.info(`  Prospects: ${sampleProspects.length}`);
   logger.info('\n  Next steps:');
   logger.info('  1. Run `npm run dev` in one terminal (API)');
   logger.info('  2. Run `npm run workers` in another terminal (agents)');
   logger.info('  3. Watch outreach emails get generated by Claude for each new lead');
+  logger.info('  4. Visit /social and /prospects pages to see social media content');
   process.exit(0);
 }
 

@@ -5,6 +5,9 @@ const {
   addFollowupJob,
   addQualificationJob,
   addSchedulingJob,
+  addContentJob,
+  addDMJob,
+  addClientFindingJob,
 } = require('../queues/index');
 const { FOLLOWUP_DELAY_DAYS } = require('../config/env');
 
@@ -21,6 +24,10 @@ router.post('/', async (req, res, next) => {
       'lead_replied',
       'meeting_booked',
       'lead_qualified',
+      'content_generated',
+      'dm_sent',
+      'prospects_found',
+      'prospect_converted',
     ];
 
     if (!type || !validTypes.includes(type)) {
@@ -68,6 +75,15 @@ router.post('/', async (req, res, next) => {
           `UPDATE leads SET status = 'booked', updated_at = NOW() WHERE id = $1`,
           [lead_id]
         );
+        break;
+      case 'content_generated':
+        job = await addContentJob(payload);
+        break;
+      case 'dm_sent':
+        job = await addDMJob({ leadId: lead_id, platform: payload.platform || 'instagram', ...payload });
+        break;
+      case 'prospects_found':
+        job = await addClientFindingJob(payload);
         break;
     }
 

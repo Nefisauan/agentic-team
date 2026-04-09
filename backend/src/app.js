@@ -60,6 +60,9 @@ app.use('/leads', require('./routes/leads'));
 app.use('/events', require('./routes/events'));
 app.use('/metrics', require('./routes/metrics'));
 app.use('/webhooks', require('./routes/webhooks'));
+app.use('/social', require('./routes/social'));
+app.use('/prospects', require('./routes/prospects'));
+app.use('/reports', require('./routes/reports'));
 
 // ── Error handling ──────────────────────────────────────────────────────────
 app.use(notFound);

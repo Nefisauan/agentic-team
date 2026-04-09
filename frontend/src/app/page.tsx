@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { Users, Mail, CheckCircle, Calendar, TrendingUp, AlertCircle } from 'lucide-react';
+import { Users, Mail, CheckCircle, Calendar, TrendingUp, AlertCircle, Instagram, MessageCircle, Search } from 'lucide-react';
 
 function StatCard({
   label,
@@ -41,6 +41,12 @@ export default function DashboardPage() {
   const { data: leadsData } = useQuery({
     queryKey: ['leads', 'all'],
     queryFn: () => api.leads.list({ limit: 5, sort: 'created_at', order: 'desc' } as any),
+  });
+
+  const { data: dashReport } = useQuery({
+    queryKey: ['dashboard-report'],
+    queryFn: api.reports.dashboard,
+    refetchInterval: 60_000,
   });
 
   const latest = metrics?.snapshots?.[0];
@@ -99,6 +105,33 @@ export default function DashboardPage() {
           sub={`${latest?.booking_rate ?? 0}% booking rate`}
         />
       </div>
+
+      {/* Social & Outreach Overview */}
+      {dashReport && (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <StatCard
+            label="Prospects Found"
+            value={parseInt(dashReport.prospects?.count || '0')}
+            icon={Search}
+            color="bg-cyan-500"
+            sub={`${dashReport.prospects?.converted || 0} converted`}
+          />
+          <StatCard
+            label="Social Posts"
+            value={parseInt(dashReport.posts?.total || '0')}
+            icon={Instagram}
+            color="bg-pink-500"
+            sub={`${dashReport.posts?.published || 0} published`}
+          />
+          <StatCard
+            label="DMs Sent"
+            value={parseInt(dashReport.dms?.sent || '0')}
+            icon={MessageCircle}
+            color="bg-purple-500"
+            sub={`${dashReport.dms?.replied || 0} replied`}
+          />
+        </div>
+      )}
 
       {/* Pipeline Funnel */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
