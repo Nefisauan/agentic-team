@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Activity, BarChart3, Zap, Instagram, MessageCircle, Search, FileText } from 'lucide-react';
+import { Users, Activity, BarChart3, Zap, Instagram, MessageCircle, Search, FileText, Handshake } from 'lucide-react';
 import clsx from 'clsx';
 
 const nav = [
@@ -10,6 +10,7 @@ const nav = [
   { href: '/leads', label: 'Leads', icon: Users },
   { href: '/social', label: 'Social Content', icon: Instagram },
   { href: '/prospects', label: 'Prospects', icon: Search },
+  { href: '/agencies', label: 'Agency Partners', icon: Handshake },
   { href: '/activity', label: 'Activity', icon: Activity },
   { href: '/metrics', label: 'Metrics', icon: BarChart3 },
   { href: '/reports', label: 'Reports', icon: FileText },
@@ -47,7 +48,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-5 py-4 border-t border-slate-700">
-        <p className="text-xs text-slate-500">v2.0.0 — Social + Email</p>
+        <p className="text-xs text-slate-500">v2.1.0 — Social + Agency</p>
       </div>
     </aside>
   );

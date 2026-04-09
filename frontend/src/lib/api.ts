@@ -198,6 +198,43 @@ export interface DashboardReport {
   recentActivity: Array<{ type: string; count: string; latest: string }>;
 }
 
+export interface AgencyPartner {
+  id: string;
+  agency_name: string;
+  contact_name: string;
+  contact_role: string;
+  email: string;
+  phone: string | null;
+  website: string | null;
+  instagram_handle: string | null;
+  linkedin_url: string | null;
+  agency_type: string;
+  services_offered: string[];
+  client_industries: string[];
+  location: string;
+  employee_count: string;
+  notes: string | null;
+  source: string;
+  partnership_pitch: string | null;
+  partnership_type: string;
+  score: number | null;
+  status: 'new' | 'researched' | 'pitched' | 'interested' | 'negotiating' | 'partner' | 'declined';
+  last_contacted_at: string | null;
+  created_at: string;
+}
+
+export interface AgencyMessage {
+  id: string;
+  agency_id: string;
+  channel: 'email' | 'instagram' | 'linkedin';
+  direction: 'inbound' | 'outbound';
+  subject: string | null;
+  content: string;
+  status: string;
+  sent_at: string;
+  created_at: string;
+}
+
 // ── API calls ─────────────────────────────────────────────────────────────────
 
 export const api = {
@@ -288,5 +325,28 @@ export const api = {
     generateWeekly: () =>
       apiFetch<{ success: boolean; report: WeeklyReport }>('/reports/weekly/generate', { method: 'POST' }),
     dashboard: () => apiFetch<DashboardReport>('/reports/dashboard'),
+  },
+
+  agencies: {
+    list: (params?: { status?: string; agency_type?: string; search?: string; limit?: number }) => {
+      const qs = new URLSearchParams(params as Record<string, string>).toString();
+      return apiFetch<{ agencies: AgencyPartner[]; total: number }>(`/agencies${qs ? `?${qs}` : ''}`);
+    },
+    get: (id: string) =>
+      apiFetch<{ agency: AgencyPartner; messages: AgencyMessage[] }>(`/agencies/${id}`),
+    update: (id: string, data: Partial<Pick<AgencyPartner, 'status' | 'notes' | 'score' | 'partnership_type'>>) =>
+      apiFetch<{ agency: AgencyPartner }>(`/agencies/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: string) =>
+      apiFetch<{ deleted: boolean }>(`/agencies/${id}`, { method: 'DELETE' }),
+    pitch: (id: string, data: { channel: string; platform?: string }) =>
+      apiFetch<{ success: boolean; jobId: string }>(`/agencies/${id}/pitch`, { method: 'POST', body: JSON.stringify(data) }),
+    research: (data?: { agencyTypes?: string[]; location?: string; count?: number }) =>
+      apiFetch<{ success: boolean; jobId: string }>('/agencies/research', { method: 'POST', body: JSON.stringify(data || {}) }),
+    batchPitch: (data?: Record<string, unknown>) =>
+      apiFetch<{ success: boolean; jobId: string }>('/agencies/batch-pitch', { method: 'POST', body: JSON.stringify(data || {}) }),
+    followup: () =>
+      apiFetch<{ success: boolean; jobId: string }>('/agencies/followup', { method: 'POST' }),
+    metrics: () =>
+      apiFetch<{ pipeline: Array<{ status: string; count: string }>; messages: Array<{ channel: string; direction: string; count: string }>; byType: Array<{ agency_type: string; count: string }> }>('/agencies/metrics/summary'),
   },
 };

@@ -21,6 +21,9 @@ const queueColors: Record<string, string> = {
   content: 'bg-pink-100 text-pink-700',
   dm: 'bg-purple-100 text-purple-700',
   'client-finding': 'bg-cyan-100 text-cyan-700',
+  agency: 'bg-amber-100 text-amber-700',
+  'agency-schedule': 'bg-amber-100 text-amber-700',
+  'dm-schedule': 'bg-purple-100 text-purple-700',
 };
 
 export default function ActivityPage() {

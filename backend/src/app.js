@@ -63,6 +63,7 @@ app.use('/webhooks', require('./routes/webhooks'));
 app.use('/social', require('./routes/social'));
 app.use('/prospects', require('./routes/prospects'));
 app.use('/reports', require('./routes/reports'));
+app.use('/agencies', require('./routes/agencies'));
 
 // ── Error handling ──────────────────────────────────────────────────────────
 app.use(notFound);

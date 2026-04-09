@@ -61,4 +61,8 @@ module.exports = {
   DM_BATCH_CRON_SCHEDULE: process.env.DM_BATCH_CRON_SCHEDULE || '0 10 * * *', // Daily 10am
   DAILY_PROSPECT_COUNT: parseInt(process.env.DAILY_PROSPECT_COUNT || '20', 10),
   DM_BATCH_LIMIT: parseInt(process.env.DM_BATCH_LIMIT || '20', 10),
+
+  // Agency partnership outreach
+  AGENCY_PARTNER_CRON_SCHEDULE: process.env.AGENCY_PARTNER_CRON_SCHEDULE || '0 9 * * *', // Daily 9am
+  DAILY_AGENCY_COUNT: parseInt(process.env.DAILY_AGENCY_COUNT || '15', 10),
 };
