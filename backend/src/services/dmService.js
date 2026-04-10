@@ -1,5 +1,11 @@
 const Anthropic = require('@anthropic-ai/sdk');
-const { ANTHROPIC_API_KEY, ANTHROPIC_MODEL, NODE_ENV } = require('../config/env');
+const { 
+  ANTHROPIC_API_KEY, 
+  ANTHROPIC_MODEL, 
+  NODE_ENV,
+  INSTAGRAM_ACCESS_TOKEN,
+  INSTAGRAM_BUSINESS_ID
+} = require('../config/env');
 const logger = require('../config/logger');
 
 const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
@@ -114,8 +120,42 @@ async function sendDM({ platform, recipientId, message }) {
     return { messageId: `mock-dm-${Date.now()}`, status: 'sent' };
   }
 
-  // TODO: Integrate with actual platform APIs
-  // Instagram: Graph API - POST /{ig-user-id}/messages
+  if (platform === 'instagram') {
+    if (!INSTAGRAM_ACCESS_TOKEN || !INSTAGRAM_BUSINESS_ID) {
+      logger.error('Cannot send IG DM: Missing INSTAGRAM_ACCESS_TOKEN or INSTAGRAM_BUSINESS_ID');
+      return { status: 'failed', reason: 'Missing credentials' };
+    }
+
+    try {
+      const url = `https://graph.facebook.com/v19.0/${INSTAGRAM_BUSINESS_ID}/messages`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${INSTAGRAM_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipient: { id: recipientId },
+          message: { text: message }
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        logger.error('Instagram Graph API Error', { data });
+        return { messageId: null, status: 'failed', error: data.error?.message || 'Unknown error' };
+      }
+
+      logger.info('Live Instagram DM sent successfully!', { messageId: data.message_id, recipientId });
+      return { messageId: data.message_id, status: 'sent' };
+
+    } catch (error) {
+      logger.error('Exception occurred sending IG DM', { error: error.message });
+      return { messageId: null, status: 'failed', error: error.message };
+    }
+  }
+
   // LinkedIn: Messaging API - POST /messages
   logger.warn(`${platform} DM sending not yet integrated — message logged only`, { recipientId });
   return { messageId: `pending-${Date.now()}`, status: 'pending' };
